@@ -91,23 +91,27 @@ class App{
     // return ((this.game.remaining - 1) % 4) || 1;
 
     // it's easier to understand when written down
-    const moves = {
-      1: 1, // we lose
-      2: 1,
-      3: 2,
-      4: 3,
-      5: 1, // we PROBABLY lose
-      6: 1,
-      7: 2,
-      8: 3,
-      9: 1, // we COULD lose
-      10: 1,
-      11: 2,
-      12: 3,
-      13: 1 // player can only win if he starts with 1 and never do any mistake (1-3-3-3)
-    };
+    // const moves = {
+    //   1: 1, // we lose
+    //   2: 1,
+    //   3: 2,
+    //   4: 3,
+    //   5: 1, // we PROBABLY lose
+    //   6: 1,
+    //   7: 2,
+    //   8: 3,
+    //   9: 1, // we COULD lose
+    //   10: 1,
+    //   11: 2,
+    //   12: 3,
+    //   13: 1 // player can only win if he starts with 1 and never do any mistake (1-3-3-3)
+    // };
 
-    return moves[this.game.remaining] || 1;
+    // return moves[this.game.remaining] || 1;
+
+    const guess = network.activate([this.game.remaining]);
+
+    return (_.findIndex(_.map(guess, Math.round)) + 1) || 1;
   }
 }
 
@@ -127,4 +131,39 @@ class Game{
 
 function sleep(n){
   return new Promise(_.partial(setTimeout, _, n * 1000));
+}
+
+const {Architect, Trainer} = synaptic;
+const network = new Architect.Perceptron(1, 5, 3);
+
+const trainingSet = [
+  {input: [1], output: [1, 0, 0]},
+  {input: [2], output: [1, 0, 0]},
+  {input: [3], output: [0, 1, 0]},
+  {input: [4], output: [0, 0, 1]},
+  {input: [5], output: [1, 0, 0]},
+  {input: [6], output: [1, 0, 0]},
+  {input: [7], output: [0, 1, 0]},
+  {input: [8], output: [0, 0, 1]},
+//  {input: [9], output: [1, 0, 0]},
+//  {input: [10], output: [1, 0, 0]},
+//  {input: [11], output: [0, 1, 0]},
+//  {input: [12], output: [0, 0, 1]},
+//  {input: [13], output: [1, 0, 0]},
+];
+
+new Trainer(network).train(trainingSet, {
+  rate: 0.1,
+  error: 0.3,
+  iterations: 500 * 1000,
+  log: 10000,
+  cost: Trainer.cost.CROSS_ENTROPY
+});
+
+[1, 2, 3, 4, 5, 6, 7, 8].forEach((n) => {
+  console.log(network.activate([n]));
+});
+
+function mapV(v, min, max, newMin, newMax){
+  return (((v - min) / (max - min)) * (newMax - newMin)) + newMin;
 }
