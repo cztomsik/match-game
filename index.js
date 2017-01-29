@@ -6,6 +6,8 @@ Vue.component('app', {
     },
     template: `
       <div>
+        <a href="http://github.com/cztomsik/match-game">Github</a>
+
         <div v-if=" app.game ">
           <div>
             <transition name="fade" v-for=" m in Array(app.game.remaining) ">
@@ -85,11 +87,24 @@ class App{
   }
 
   guess(){
+    // the actual algo to win
+    // return ((this.game.remaining - 1) % 4) || 1;
+
+    // it's easier to understand when written down
     const moves = {
-      8: 3,
-      6: 1,
+      1: 1, // we lose
+      2: 1,
+      3: 2,
       4: 3,
-      3: 2
+      5: 1, // we PROBABLY lose
+      6: 1,
+      7: 2,
+      8: 3,
+      9: 1, // we COULD lose
+      10: 1,
+      11: 2,
+      12: 3,
+      13: 1 // player can only win if he starts with 1 and never do any mistake (1-3-3-3)
     };
 
     return moves[this.game.remaining] || 1;
@@ -98,7 +113,7 @@ class App{
 
 class Game{
   constructor(){
-    this.remaining = 12;
+    this.remaining = 14;
   }
 
   pull(n){
